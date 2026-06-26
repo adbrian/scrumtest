@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scrum Practice Test</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f2f5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px;
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: #1a1a2e;
+      margin-bottom: 20px;
+      letter-spacing: 0.5px;
+    }
+
+    /* Question navigator */
+    #navigator {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      background: #fff;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      max-width: 760px;
+      width: 100%;
+      margin-bottom: 24px;
+    }
+
+    .nav-box {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 2px solid #ccd0d9;
+      color: #1a1a2e;
+      background: #fff;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+
+    .nav-box:hover { border-color: #4a6cf7; color: #4a6cf7; }
+    .nav-box.current { border-color: #4a6cf7; background: #4a6cf7; color: #fff; }
+    .nav-box.answered { background: #b0b8c9; border-color: #b0b8c9; color: #fff; }
+    .nav-box.answered.current { background: #4a6cf7; border-color: #4a6cf7; }
+    .nav-box.correct { background: #22c55e; border-color: #22c55e; color: #fff; }
+    .nav-box.incorrect { background: #ef4444; border-color: #ef4444; color: #fff; }
+
+    /* Question card */
+    #question-card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 32px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      max-width: 760px;
+      width: 100%;
+    }
+
+    #q-counter {
+      font-size: 0.82rem;
+      color: #6b7280;
+      margin-bottom: 10px;
+      font-weight: 500;
+    }
+
+    #q-text {
+      font-size: 1.05rem;
+      color: #1a1a2e;
+      line-height: 1.6;
+      margin-bottom: 28px;
+      font-weight: 500;
+    }
+
+    #options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .option-label {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 18px;
+      border: 2px solid #e5e7eb;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-size: 0.95rem;
+      color: #374151;
+    }
+
+    .option-label:hover { border-color: #4a6cf7; background: #f5f7ff; }
+
+    .option-label input[type="radio"] {
+      accent-color: #4a6cf7;
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .option-label.selected {
+      border-color: #4a6cf7;
+      background: #eef1ff;
+      color: #1a1a2e;
+      font-weight: 500;
+    }
+
+    /* After submit: result styling */
+    .option-label.result-correct {
+      border-color: #22c55e;
+      background: #f0fdf4;
+      color: #166534;
+    }
+
+    .option-label.result-incorrect {
+      border-color: #ef4444;
+      background: #fef2f2;
+      color: #991b1b;
+    }
+
+    /* Navigation buttons */
+    #nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn {
+      padding: 11px 28px;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    .btn-secondary {
+      background: #f3f4f6;
+      color: #374151;
+    }
+    .btn-secondary:hover:not(:disabled) { background: #e5e7eb; }
+
+    .btn-primary {
+      background: #4a6cf7;
+      color: #fff;
+    }
+    .btn-primary:hover:not(:disabled) { background: #3a5ce4; }
+
+    .btn-submit {
+      background: #16a34a;
+      color: #fff;
+    }
+    .btn-submit:hover:not(:disabled) { background: #15803d; }
+
+    /* Modal overlay */
+    #modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #modal-overlay.show { display: flex; }
+
+    #modal {
+      background: #fff;
+      border-radius: 14px;
+      padding: 32px;
+      max-width: 420px;
+      width: 90%;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+    }
+
+    #modal h2 {
+      font-size: 1.1rem;
+      color: #1a1a2e;
+      margin-bottom: 12px;
+    }
+
+    #modal p {
+      font-size: 0.92rem;
+      color: #6b7280;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    #modal-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+
+    /* Results banner */
+    #results-banner {
+      display: none;
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px 28px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      max-width: 760px;
+      width: 100%;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+
+    #results-banner.show { display: block; }
+
+    #results-banner h2 {
+      font-size: 1.3rem;
+      color: #1a1a2e;
+      margin-bottom: 6px;
+    }
+
+    #results-banner p {
+      color: #6b7280;
+      font-size: 0.95rem;
+    }
+
+    #score-display {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: #4a6cf7;
+      margin: 8px 0;
+    }
+
+    #restart-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    .btn-restart {
+      background: #4a6cf7;
+      color: #fff;
+    }
+    .btn-restart:hover { background: #3a5ce4; }
+
+    .btn-restart-random {
+      background: #d97706;
+    }
+    .btn-restart-random:hover { background: #b45309; }
+  </style>
+</head>
+<body>
+
+<h1>Scrum Practice Test</h1>
+
+<div id="results-banner">
+  <h2>Test Submitted</h2>
+  <div id="score-display"></div>
+  <p id="score-label"></p>
+  <div id="restart-buttons">
+    <button class="btn btn-restart" onclick="restartTest(false)">Restart — Original Order</button>
+    <button class="btn btn-restart btn-restart-random" onclick="restartTest(true)">Restart — Random Order</button>
+  </div>
+</div>
+
+<div id="navigator"></div>
+
+<div id="question-card">
+  <div id="q-counter"></div>
+  <div id="q-text"></div>
+  <div id="options-list"></div>
+  <div id="nav-buttons">
+    <button class="btn btn-secondary" id="btn-back" onclick="goBack()">Back</button>
+    <button class="btn btn-submit" id="btn-submit" onclick="attemptSubmit()">Submit Test</button>
+    <button class="btn btn-primary" id="btn-next" onclick="goNext()">Next</button>
+  </div>
+</div>
+
+<div id="modal-overlay">
+  <div id="modal">
+    <h2 id="modal-title"></h2>
+    <p id="modal-body"></p>
+    <div id="modal-buttons">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-submit" onclick="confirmSubmit()">Submit</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const questions = [
+  {
+    text: "Ensuring scrum is enacted and understood is the accountability of _______",
+    options: ["Product Owner", "Scrum Master", "Developers", "Scrum Team"]
+  },
+  {
+    text: "Sprint work is the accountability of ______",
+    options: ["Product Owner", "Scrum Master", "Developers", "Scrum Team"]
+  },
+  {
+    text: "Cross functional is the Characteristics of a _______",
+    options: ["Product Owner", "Scrum Master", "Developers", "Scrum Team"]
+  },
+  {
+    text: "Coaching in Self Management & Cross Functionality is the accountability of _______",
+    options: ["Product Owner", "Scrum Master", "Developers", "Scrum Team"]
+  },
+  {
+    text: "No Sub Teams & Titles is the Characteristics of a _______",
+    options: ["Product Owner", "Scrum Master", "Developers", "Scrum Team"]
+  },
+  {
+    text: "Understand the need for a clear and concise Product Backlog Items is the accountability of _______",
+    options: ["Product Owner", "Scrum Master", "Developers", "Scrum Team"]
+  },
+  {
+    text: "Who is the Voice of Stakeholders in Scrum Team?",
+    options: ["Product Owner", "Scrum Master", "Developers", "Scrum Team"]
+  },
+  {
+    text: "Coach on How to arrange the Product Backlog to maximize value is the accountability of ______",
+    options: ["Product Owner", "Scrum Master", "Developers", "Scrum Team"]
+  },
+  {
+    text: "Clearly communicating Product Goal to the Scrum team is the accountability of ______",
+    options: ["Product Owner", "Scrum Master", "Developers", "Scrum Team"]
+  },
+  {
+    text: "Maximizing the value of the product is the accountability of ______",
+    options: ["Product Owner", "Scrum Master", "Developers", "Scrum Team"]
+  },
+  {
+    text: "A Product Owner orders the work for a ______ into a Product Backlog",
+    options: ["Simple Problem", "Complicated Problem", "Complex Problem", "Chaos Problem"]
+  },
+  {
+    text: "Scrum is _____weight Framework",
+    options: ["Heavy", "Light"]
+  },
+  {
+    text: "Size 10 or less is the Characteristics of a _______",
+    options: ["Product Owner", "Scrum Master", "Developers", "Scrum Team"]
+  },
+  {
+    text: "Mutual Accountable is the Characteristics of a ______",
+    options: ["Product Owner", "Scrum Master", "Developers", "Scrum Team"]
+  },
+  {
+    text: "Self Management is the accountability of ______",
+    options: ["Product Owner", "Scrum Master", "Developers", "Scrum Team"]
+  },
+  {
+    text: "Sprint Retrospective is Attended by _______",
+    options: ["Product Owner", "Scrum Master", "Developers", "Scrum Team"]
+  },
+  {
+    text: "Size the work is the right of _______",
+    options: ["Product Owner", "Scrum Master", "Developers", "Scrum Team"]
+  },
+  {
+    text: "Hire and Fire is the accountability of _______",
+    options: ["Product Owner", "Scrum Master", "Developers", "None"]
+  },
+  {
+    text: "Inspect and Adapt is the accountability of ______",
+    options: ["Product Owner", "Scrum Master", "Developers", "Scrum Team"]
+  },
+  {
+    text: "Manage Budgets is the accountability of _______",
+    options: ["Product Owner", "Scrum Master", "Developers", "Scrum Team"]
+  },
+  {
+    text: "Technical Excellence to be able to do the Sprint Work is the accountability of _______",
+    options: ["Product Owner", "Scrum Master", "Developers", "Scrum Team"]
+  },
+  {
+    text: "Helping Organization and Scrum Team Understand and Practice Agility is the accountability of _______",
+    options: ["Product Owner", "Scrum Master", "Developers", "Scrum Team"]
+  },
+  {
+    text: "Help Scrum Team Resolve Organization level impediments is the accountability of _______",
+    options: ["Product Owner", "Scrum Master", "Developers", "Scrum Team"]
+  },
+  {
+    text: "Ensuring that the Product Backlog is visible, Transparent and clear to all is the accountability of _______",
+    options: ["Product Owner", "Scrum Master", "Developers", "Scrum Team"]
+  },
+  {
+    text: "Appraisals in Scrum is the accountability of _______",
+    options: ["Product Owner", "Scrum Master", "Scrum Team", "None"]
+  },
+  {
+    text: "Helping to Find Techniques for effective Product Backlog management is the accountability of ______",
+    options: ["Product Owner", "Scrum Master", "Developers", "Scrum Team"]
+  },
+  {
+    text: "Ordering the item in Product Backlog is the accountability of _______",
+    options: ["Product Owner", "Scrum Master", "Developers", "Scrum Team"]
+  },
+  {
+    text: "Organize and manage their own Work during the Sprint is the accountability of _______",
+    options: ["Product Owner", "Scrum Master", "Developers", "Scrum Team"]
+  },
+  {
+    text: "Causing change that improves the effectiveness of the Scrum Team is the accountability of _______",
+    options: ["Product Owner", "Scrum Master", "Developers", "Scrum Team"]
+  },
+  {
+    text: "Ensuring Increment meets DoD is the accountability of _______",
+    options: ["Product Owner", "Scrum Master", "Developers", "Scrum Team"]
+  },
+  {
+    text: "Recruitment and Resource Onboarding is the accountability of ______",
+    options: ["Product Owner", "Scrum Master", "Scrum Team", "None"]
+  },
+  {
+    text: "Track Progress towards the Product Goal is the accountability of _______",
+    options: ["Product Owner", "Scrum Master", "Developers", "Scrum Team"]
+  },
+  {
+    text: "Reduce Technical Debt is the accountability of _______",
+    options: ["Product Owner", "Scrum Master", "Developers", "Scrum Team"]
+  },
+  {
+    text: "Acceptance and verification of \"Done\" is the accountability of _______",
+    options: ["Product Owner", "Scrum Master", "Developers", "Scrum Team"]
+  },
+  {
+    text: "Track Progress of the work in the Sprint is the accountability of ______",
+    options: ["Product Owner", "Scrum Master", "Developers", "Scrum Team"]
+  },
+  {
+    text: "Causing Removal of Impediments to the Scrum Team is the accountability of ______",
+    options: ["Product Owner", "Scrum Master", "Developers", "Scrum Team"]
+  },
+  {
+    text: "Try Scrum as is and determine if its philosophy, theory, and structure help to achieve goals and create _____",
+    options: ["Product Backlog", "Sprint Backlog", "Value", "Scrum Team"]
+  },
+  {
+    text: "The Scrum Team and its stakeholders _____ the results and adjust for the next Sprint",
+    options: ["Adapt", "Audit", "Inspect", "Produce"]
+  },
+  {
+    text: "The Scrum Team turns a selection of the work into _____ of value during a Sprint",
+    options: ["An Increment", "Sprint Backlog", "Product Backlog", "Shippable Product"]
+  },
+  {
+    text: "Scrum is used to solve ______ Problems",
+    options: ["Simple", "Complicated", "Complex", "Disorder"]
+  }
+];
+
+// Correct answer indices (0-based): a=0, b=1, c=2, d=3
+const correctAnswers = [1, 2, 3, 1, 3, 0, 0, 1, 0, 0, 2, 1, 3, 3, 3, 3, 2, 3, 3, 0, 2, 1, 1, 0, 3, 1, 0, 2, 1, 3, 3, 0, 2, 0, 2, 1, 2, 2, 0, 2];
+
+const originalOrder = [...Array(questions.length).keys()];
+let order = [...originalOrder];
+let userAnswers = new Array(questions.length).fill(null);
+let currentQ = 0;
+let submitted = false;
+
+function buildNavigator() {
+  const nav = document.getElementById('navigator');
+  nav.innerHTML = '';
+  questions.forEach((_, i) => {
+    const box = document.createElement('div');
+    box.className = 'nav-box';
+    box.textContent = i + 1;
+    box.id = `nav-${i}`;
+    box.onclick = () => goToQuestion(i);
+    nav.appendChild(box);
+  });
+}
+
+function updateNavigator() {
+  questions.forEach((_, i) => {
+    const box = document.getElementById(`nav-${i}`);
+    box.className = 'nav-box';
+    const origIdx = order[i];
+
+    if (submitted) {
+      box.classList.add(userAnswers[origIdx] === correctAnswers[origIdx] ? 'correct' : 'incorrect');
+    } else {
+      if (userAnswers[origIdx] !== null) box.classList.add('answered');
+    }
+
+    if (i === currentQ) box.classList.add('current');
+  });
+}
+
+function renderQuestion() {
+  const origIdx = order[currentQ];
+  const q = questions[origIdx];
+  document.getElementById('q-counter').textContent = `Question ${currentQ + 1} of ${questions.length}`;
+  document.getElementById('q-text').textContent = q.text;
+
+  const optList = document.getElementById('options-list');
+  optList.innerHTML = '';
+
+  q.options.forEach((opt, idx) => {
+    const label = document.createElement('label');
+    label.className = 'option-label';
+    label.id = `opt-label-${idx}`;
+
+    const radio = document.createElement('input');
+    radio.type = 'radio';
+    radio.name = 'option';
+    radio.value = idx;
+    radio.checked = userAnswers[origIdx] === idx;
+    radio.disabled = submitted;
+
+    if (submitted) {
+      if (idx === correctAnswers[origIdx]) {
+        label.classList.add('result-correct');
+      } else if (userAnswers[origIdx] === idx) {
+        label.classList.add('result-incorrect');
+      }
+    } else if (userAnswers[origIdx] === idx) {
+      label.classList.add('selected');
+    }
+
+    radio.addEventListener('change', () => {
+      if (submitted) return;
+      userAnswers[origIdx] = idx;
+      document.querySelectorAll('.option-label').forEach(l => l.classList.remove('selected'));
+      label.classList.add('selected');
+      updateNavigator();
+    });
+
+    const span = document.createElement('span');
+    const letter = String.fromCharCode(97 + idx).toUpperCase();
+    span.textContent = `${letter}. ${opt}`;
+
+    label.appendChild(radio);
+    label.appendChild(span);
+    optList.appendChild(label);
+  });
+
+  document.getElementById('btn-back').disabled = currentQ === 0;
+  document.getElementById('btn-next').disabled = currentQ === questions.length - 1;
+  document.getElementById('btn-submit').style.display = submitted ? 'none' : '';
+
+  updateNavigator();
+}
+
+function goToQuestion(idx) {
+  currentQ = idx;
+  renderQuestion();
+}
+
+function goBack() {
+  if (currentQ > 0) { currentQ--; renderQuestion(); }
+}
+
+function goNext() {
+  if (currentQ < questions.length - 1) { currentQ++; renderQuestion(); }
+}
+
+function attemptSubmit() {
+  const unanswered = userAnswers.filter(a => a === null).length;
+  const title = document.getElementById('modal-title');
+  const body = document.getElementById('modal-body');
+
+  if (unanswered > 0) {
+    title.textContent = 'Unanswered Questions';
+    body.textContent = `You have ${unanswered} unanswered question${unanswered > 1 ? 's' : ''}. Are you sure you want to submit?`;
+  } else {
+    title.textContent = 'Submit Test';
+    body.textContent = 'All questions answered. Are you sure you would like to submit?';
+  }
+
+  document.getElementById('modal-overlay').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('show');
+}
+
+function confirmSubmit() {
+  closeModal();
+  submitted = true;
+
+  const correct = userAnswers.reduce((acc, ans, i) => acc + (ans === correctAnswers[i] ? 1 : 0), 0);
+  const total = questions.length;
+  const pct = Math.round((correct / total) * 100);
+
+  const banner = document.getElementById('results-banner');
+  banner.classList.add('show');
+  document.getElementById('score-display').textContent = `${correct} / ${total}`;
+  document.getElementById('score-label').textContent = `${pct}% — ${pct >= 70 ? 'Passed' : 'Not Passed'}`;
+
+  renderQuestion();
+}
+
+function restartTest(shuffle) {
+  if (shuffle) {
+    const arr = [...originalOrder];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    order = arr;
+  } else {
+    order = [...originalOrder];
+  }
+  userAnswers = new Array(questions.length).fill(null);
+  currentQ = 0;
+  submitted = false;
+  document.getElementById('results-banner').classList.remove('show');
+  buildNavigator();
+  renderQuestion();
+}
+
+// Init
+buildNavigator();
+renderQuestion();
+</script>
+</body>
+</html>
