@@ -7,20 +7,41 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
+    :root {
+      --bg: #919191;
+      --card-bg: #fff;
+      --text-primary: #1a1a2e;
+      --text-secondary: #6b7280;
+      --text-option: #374151;
+      --border: #e5e7eb;
+      --border-nav: #ccd0d9;
+      --nav-answered: #b0b8c9;
+      --option-hover-bg: #f5f7ff;
+      --option-selected-bg: #eef1ff;
+      --btn-secondary-bg: #f3f4f6;
+      --btn-secondary-text: #374151;
+      --btn-secondary-hover: #e5e7eb;
+      --shadow: rgba(0,0,0,0.08);
+      --modal-bg: #fff;
+    }
+
+
     body {
       font-family: 'Segoe UI', sans-serif;
-      background: #f0f2f5;
+      background: var(--bg);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       padding: 24px 16px;
+      transition: background 0.2s ease;
     }
+
 
     h1 {
       font-size: 1.4rem;
       font-weight: 600;
-      color: #1a1a2e;
+      color: var(--text-primary);
       margin-bottom: 20px;
       letter-spacing: 0.5px;
     }
@@ -30,13 +51,14 @@
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
-      background: #fff;
+      background: var(--card-bg);
       border-radius: 12px;
       padding: 16px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      box-shadow: 0 2px 8px var(--shadow);
       max-width: 760px;
       width: 100%;
       margin-bottom: 24px;
+      transition: background 0.2s ease;
     }
 
     .nav-box {
@@ -49,40 +71,41 @@
       font-size: 0.78rem;
       font-weight: 600;
       cursor: pointer;
-      border: 2px solid #ccd0d9;
-      color: #1a1a2e;
-      background: #fff;
+      border: 2px solid var(--border-nav);
+      color: var(--text-primary);
+      background: var(--card-bg);
       transition: all 0.15s ease;
       user-select: none;
     }
 
     .nav-box:hover { border-color: #4a6cf7; color: #4a6cf7; }
     .nav-box.current { border-color: #4a6cf7; background: #4a6cf7; color: #fff; }
-    .nav-box.answered { background: #b0b8c9; border-color: #b0b8c9; color: #fff; }
+    .nav-box.answered { background: var(--nav-answered); border-color: var(--nav-answered); color: #fff; }
     .nav-box.answered.current { background: #4a6cf7; border-color: #4a6cf7; }
     .nav-box.correct { background: #22c55e; border-color: #22c55e; color: #fff; }
     .nav-box.incorrect { background: #ef4444; border-color: #ef4444; color: #fff; }
 
     /* Question card */
     #question-card {
-      background: #fff;
+      background: var(--card-bg);
       border-radius: 14px;
       padding: 32px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      box-shadow: 0 2px 8px var(--shadow);
       max-width: 760px;
       width: 100%;
+      transition: background 0.2s ease;
     }
 
     #q-counter {
       font-size: 0.82rem;
-      color: #6b7280;
+      color: var(--text-secondary);
       margin-bottom: 10px;
       font-weight: 500;
     }
 
     #q-text {
       font-size: 1.05rem;
-      color: #1a1a2e;
+      color: var(--text-primary);
       line-height: 1.6;
       margin-bottom: 28px;
       font-weight: 500;
@@ -100,15 +123,15 @@
       align-items: center;
       gap: 14px;
       padding: 14px 18px;
-      border: 2px solid #e5e7eb;
+      border: 2px solid var(--border);
       border-radius: 10px;
       cursor: pointer;
       transition: all 0.15s ease;
       font-size: 0.95rem;
-      color: #374151;
+      color: var(--text-option);
     }
 
-    .option-label:hover { border-color: #4a6cf7; background: #f5f7ff; }
+    .option-label:hover { border-color: #4a6cf7; background: var(--option-hover-bg); }
 
     .option-label input[type="radio"] {
       accent-color: #4a6cf7;
@@ -120,8 +143,8 @@
 
     .option-label.selected {
       border-color: #4a6cf7;
-      background: #eef1ff;
-      color: #1a1a2e;
+      background: var(--option-selected-bg);
+      color: var(--text-primary);
       font-weight: 500;
     }
 
@@ -159,10 +182,10 @@
     .btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
     .btn-secondary {
-      background: #f3f4f6;
-      color: #374151;
+      background: var(--btn-secondary-bg);
+      color: var(--btn-secondary-text);
     }
-    .btn-secondary:hover:not(:disabled) { background: #e5e7eb; }
+    .btn-secondary:hover:not(:disabled) { background: var(--btn-secondary-hover); }
 
     .btn-primary {
       background: #4a6cf7;
@@ -190,23 +213,23 @@
     #modal-overlay.show { display: flex; }
 
     #modal {
-      background: #fff;
+      background: var(--modal-bg);
       border-radius: 14px;
       padding: 32px;
       max-width: 420px;
       width: 90%;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+      box-shadow: 0 8px 32px var(--shadow);
     }
 
     #modal h2 {
       font-size: 1.1rem;
-      color: #1a1a2e;
+      color: var(--text-primary);
       margin-bottom: 12px;
     }
 
     #modal p {
       font-size: 0.92rem;
-      color: #6b7280;
+      color: var(--text-secondary);
       line-height: 1.6;
       margin-bottom: 24px;
     }
@@ -220,26 +243,27 @@
     /* Results banner */
     #results-banner {
       display: none;
-      background: #fff;
+      background: var(--card-bg);
       border-radius: 12px;
       padding: 20px 28px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      box-shadow: 0 2px 8px var(--shadow);
       max-width: 760px;
       width: 100%;
       margin-bottom: 24px;
       text-align: center;
+      transition: background 0.2s ease;
     }
 
     #results-banner.show { display: block; }
 
     #results-banner h2 {
       font-size: 1.3rem;
-      color: #1a1a2e;
+      color: var(--text-primary);
       margin-bottom: 6px;
     }
 
     #results-banner p {
-      color: #6b7280;
+      color: var(--text-secondary);
       font-size: 0.95rem;
     }
 
@@ -268,6 +292,18 @@
       background: #d97706;
     }
     .btn-restart-random:hover { background: #b45309; }
+
+    .btn-restart-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .btn-restart-subtitle {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
   </style>
 </head>
 <body>
@@ -279,8 +315,14 @@
   <div id="score-display"></div>
   <p id="score-label"></p>
   <div id="restart-buttons">
-    <button class="btn btn-restart" onclick="restartTest(false)">Restart — Original Order</button>
-    <button class="btn btn-restart btn-restart-random" onclick="restartTest(true)">Restart — Random Order</button>
+    <div class="btn-restart-wrapper">
+      <button class="btn btn-restart" onclick="restartTest(false)">Restart — Original Order</button>
+      <span class="btn-restart-subtitle">Questions appear in their original fixed order</span>
+    </div>
+    <div class="btn-restart-wrapper">
+      <button class="btn btn-restart btn-restart-random" onclick="restartTest(true)">Restart — Random Order</button>
+      <span class="btn-restart-subtitle">Questions appear in a new shuffled order</span>
+    </div>
   </div>
 </div>
 
@@ -609,7 +651,7 @@ function confirmSubmit() {
   const banner = document.getElementById('results-banner');
   banner.classList.add('show');
   document.getElementById('score-display').textContent = `${correct} / ${total}`;
-  document.getElementById('score-label').textContent = `${pct}% — ${pct >= 70 ? 'Passed' : 'Not Passed'}`;
+  document.getElementById('score-label').textContent = `${pct}% — ${pct >= 100 ? 'Passed' : 'Not Passed'}`;
 
   renderQuestion();
 }
